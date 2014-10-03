@@ -8,5 +8,6 @@
 
 import Foundation
 
-println("Hello, World!")
-
+let r = Char("/") & Char("*") & !(Range("abcdefghijklmnopqrstuvqxyz")* & Char("*") & Char("/") & Range("abcdefghijklmnopqrstuvqxyz")*) & Char("*") & Char("/")
+let x = matches(r, "/*test*/test*/")
+println(x)
