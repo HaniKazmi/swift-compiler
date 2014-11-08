@@ -10,6 +10,7 @@
 		37B803DE19DAF936004984B4 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B803DD19DAF936004984B4 /* main.swift */; };
 		37E244A419DC922D00FAF59A /* Rexp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E244A319DC922D00FAF59A /* Rexp.swift */; };
 		B973798219FEB62400F6DBBE /* tokeniser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B973798119FEB62400F6DBBE /* tokeniser.swift */; };
+		B98631611A0E856300830832 /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98631601A0E856300830832 /* Tokens.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,7 @@
 		37B803DD19DAF936004984B4 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		37E244A319DC922D00FAF59A /* Rexp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rexp.swift; sourceTree = "<group>"; };
 		B973798119FEB62400F6DBBE /* tokeniser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = tokeniser.swift; sourceTree = "<group>"; };
+		B98631601A0E856300830832 /* Tokens.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 				37B803DD19DAF936004984B4 /* main.swift */,
 				37E244A319DC922D00FAF59A /* Rexp.swift */,
 				B973798119FEB62400F6DBBE /* tokeniser.swift */,
+				B98631601A0E856300830832 /* Tokens.swift */,
 			);
 			path = Regex;
 			sourceTree = "<group>";
@@ -127,6 +130,7 @@
 				B973798219FEB62400F6DBBE /* tokeniser.swift in Sources */,
 				37E244A419DC922D00FAF59A /* Rexp.swift in Sources */,
 				37B803DE19DAF936004984B4 /* main.swift in Sources */,
+				B98631611A0E856300830832 /* Tokens.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

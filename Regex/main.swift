@@ -8,50 +8,18 @@
 
 import Foundation
 
-// Helper functions
-func printR(r: Rexp, s: String) {
-    println("\(s): \(matches(r, s))")
+let dir = (NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.AllDomainsMask, true) as? [String])![0]
+
+func tokenise(path: String) -> token {
+    let path = dir.stringByAppendingPathComponent(path);
+    let content = String(contentsOfFile: path, encoding: NSUTF8StringEncoding, error: nil)!
+    return tok(TOKEN, content)
 }
 
-infix operator ^ { precedence 160 }
-
-let allLetters = "abcdefghijklmnopqrstuvwxyz"
-let allNums = "0123456789"
-let allSym = "_.-€"
-let allChars = allLetters + allNums + allSym
-
-let s = ("asas" ~ /"a") & (/"b" & /"c")
-//println(mkeps(ders(Array("abc"), s)))
-
-println(lex(s, "abc"))
-
-// Question 3
-let e = Chars(allChars)+ & /"@" & Chars(allLetters+"."+"-")+ & /"." & (Chars(allLetters+".")^[2,6])
-printR(/"hello", "hello")
-printR(e, "hani.kazmi@kcl.ac.uk")
-println(ders("hani.kazmi@kcl.ac.uk", e))
-
-
-// Question 4
-let r = /"/" & /"*" & !(Chars("abcdefghijklmnopqrstuvqxyz")* & /"*" & /"/" & Chars("abcdefghijklmnopqrstuvqxyz")*) & /"*" & /"/"
-
-printR(r, "/**/")
-printR(r, "/*foobar*/")
-printR(r, "/*test*/test*/")
-printR(r, "/*test*/*test*/")
-
-// Question 5
-let r1 = /"a" & /"a" & /"a"
-let r2 = /"a"^[19,19] & (/"a")%
-
-let a1 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-let a2 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-let a3 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-
-printR((r1+)+, a1)
-printR((r1+)+, a2)
-printR((r1+)+, a3)
-
-printR((r2+)+, a1)
-printR((r2+)+, a2)
-printR((r2+)+, a3)
+let startTime = CFAbsoluteTimeGetCurrent()
+for var x=0; x<100; x++ {
+    tokenise("test1.txt")
+    tokenise("test.txt")
+}
+let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
+println("Time elapsed: \(timeElapsed) s")
