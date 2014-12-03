@@ -17,7 +17,7 @@ let KEYWORDS    = "while" | "if" | "then" | "else" | "do" | "for" | "to" | "true
 let OPERATORS   = "+" | "-" | "*" | "%" | "/" | "==" | "!=" | ">" | "<" | ":=" | "&&" | "||"
 let STRINGS     = "\"" & CHAR* & "\""
 let PARAN       = "(" | ")" | "{" | "}"
-let SEMI        = /";"
+let SEMI: Rexp  = /";"
 let WHITE       = (/" ")+ | "\n"
 let IDENT       = CHAR & (CHAR | DIGIT | "_")*
 let NUM         = DIGIT+

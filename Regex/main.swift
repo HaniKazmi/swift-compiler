@@ -18,14 +18,15 @@ func tokenise(path: String) -> token {
 
 let x = CharParse("a")
 let y = CharParse("b")
-let z = AltParser(x, y)
+let z = AltParse(x, y)
 println(z("ca"))
 println(x("asdfgh"))
 let a = SeqParse(z, y)
+let s = IdParser()
+println(s("h2ello"))
 println(a("bbassas"))
 
-let test = E()
-println(test("1+2*3+1"))
+Eval("{n:=10/0}")
 let startTime = CFAbsoluteTimeGetCurrent()
 
 for var x=0; x<100; x++ {
