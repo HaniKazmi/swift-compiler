@@ -16,10 +16,22 @@ func tokenise(path: String) -> token {
     return tok(TOKEN, content)
 }
 
+let x = CharParse("a")
+let y = CharParse("b")
+let z = AltParser(x, y)
+println(z("ca"))
+println(x("asdfgh"))
+let a = SeqParse(z, y)
+println(a("bbassas"))
+
+let test = E()
+println(test("1+2*3+1"))
 let startTime = CFAbsoluteTimeGetCurrent()
+
 for var x=0; x<100; x++ {
     tokenise("test1.txt")
     tokenise("test.txt")
 }
+
 let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
 println("Time elapsed: \(timeElapsed) s")

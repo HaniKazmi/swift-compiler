@@ -27,69 +27,49 @@ class Not: UnaryRexp {}
 
 class Rec: Rexp { let x: String, r: Rexp; init(_ x: String, _ r: Rexp) { self.x = x; self.r = r } }
 
-extension Rexp: Printable {
-    var description: String {
-        switch self {
-        case is Null: return "Null"
-        case is Empty: return "Empty"
-        case let r as Char: return "Char(\"\(r.c)\")"
-        case let r as Alt: return "Alt(\(r.r1),\(r.r2))"
-        case let r as Seq: return "Seq(\(r.r1),\(r.r2))"
-        case let r as Star: return "Star(\(r.r))"
-        case let r as Chars: return "Chars(\"\(String(r.c))\")"
-        case let r as Plus: return "Plus(\(r.r))"
-        case let r as Opt: return "\(r.r)?"
-        case let r as Ntimes: return "Mult(\(r.r), \(r.n))"
-        case let r as Mult: return "Mult(\(r.r), \(r.n), \(r.m))"
-        case let r as Not: return "Not(\(r.r))"
-        case let r as Rec: return r.r.description
-        default: return "Error"
-        }
-    }
-}
-
 func nullable(r: Rexp) -> Bool {
     switch r {
-    case is Null: return false
-    case is Empty: return true
-    case is Char: return false
-    case let r as Alt: return nullable(r.r1) || nullable(r.r2)
-    case let r as Seq: return nullable(r.r1) && nullable(r.r2)
-    case is Star: return true
-    case is Chars: return false
-    case let r as Plus: return nullable(r.r)
-    case let r as Opt: return true
-    case let r as Ntimes: return r.n == 0 ? true : nullable(r.r)
-    case let r as Mult: return r.n <= 0 ? true : nullable(r.r)
-    case let r as Not: return !nullable(r.r)
-    case let r as Rec: return nullable(r.r)
-    default: return false
+    case is Null:           return false
+    case is Empty:          return true
+    case is Char:           return false
+    case let r as Alt:      return nullable(r.r1) || nullable(r.r2)
+    case let r as Seq:      return nullable(r.r1) && nullable(r.r2)
+    case is Star:           return true
+    case is Chars:          return false
+    case let r as Plus:     return nullable(r.r)
+    case let r as Opt:      return true
+    case let r as Ntimes:   return r.n == 0 ? true : nullable(r.r)
+    case let r as Mult:     return r.n <= 0 ? true : nullable(r.r)
+    case let r as Not:      return !nullable(r.r)
+    case let r as Rec:      return nullable(r.r)
+    default:                return false
     }
 }
 
 func der(c: Character, r: Rexp) -> Rexp {
     switch r {
-    case is Null: return Null()
-    case is Empty: return Null()
-    case let r as Char: return c == r.c ? Empty() : Null()
-    case let r as Alt: return Alt(der(c, r.r1), der(c, r.r2))
-    case let r as Seq: return nullable(r.r1) ?
-        Alt(Seq(der(c, r.r1), r.r2), der(c, r.r2)) : Seq(der(c, r.r1), r.r2)
-    case let r as Star: return Seq(der(c, r.r), Star(r.r))
-    case let r as Chars: return contains(r.c, c) ? Empty() : Null()
-    case let r as Plus: return Seq(der(c, r.r), Star(r.r))
-    case let r as Opt: return der(c, r.r)
-    case let r as Ntimes: return r.n == 0 ? Null() : Seq(der(c, r.r), Ntimes(r.r, r.n-1))
-    case let r as Mult: return r.m == 0 ? Null() : Seq(der(c, r.r), Mult(r: r.r, n: r.n-1, m: r.m-1))
-    case let r as Not: return Not(der(c, r.r))
-    case let r as Rec: return der(c, r.r)
-    default: return r
+    case is Null:           return Null()
+    case is Empty:          return Null()
+    case let r as Char:     return c == r.c ? Empty() : Null()
+    case let r as Alt:      return Alt(der(c, r.r1), der(c, r.r2))
+    case let r as Seq:      return nullable(r.r1) ?
+        Alt(Seq(der(c, r.r1), r.r2), der(c, r.r2)) :
+        Seq(der(c, r.r1), r.r2)
+    case let r as Star:     return Seq(der(c, r.r), Star(r.r))
+    case let r as Chars:    return contains(r.c, c) ? Empty() : Null()
+    case let r as Plus:     return Seq(der(c, r.r), Star(r.r))
+    case let r as Opt:      return der(c, r.r)
+    case let r as Ntimes:   return r.n == 0 ? Null() : Seq(der(c, r.r), Ntimes(r.r, r.n-1))
+    case let r as Mult:     return r.m == 0 ? Null() : Seq(der(c, r.r), Mult(r: r.r, n: r.n-1, m: r.m-1))
+    case let r as Not:      return Not(der(c, r.r))
+    case let r as Rec:      return der(c, r.r)
+    default:                return r
     }
 }
 
 func ders(s: String, r:Rexp) -> Rexp {
     if s.isEmpty { return r }
-    return ders(s[1..<s.count], simp(der(s[0], r)).0)
+    return ders(s.s, simp(der(s.c, r)).0)
 }
 
 func matches(r: Rexp, s:String) -> Bool {
@@ -99,13 +79,13 @@ func matches(r: Rexp, s:String) -> Bool {
 func simp(r: Rexp) -> (Rexp, Val -> Val) {
     func f_alt(f1: Val -> Val, f2: Val -> Val) -> Val -> Val {
         return {
-            if let v = $0 as? left { return left(v: f1(v.v)) }
-            else { let v = $0 as right; return right(v: f2(v.v)) }
+            if let v = $0 as? left { return left(f1(v.v)) }
+            else { let v = $0 as right; return right(f2(v.v)) }
         }
     }
     
     func f_seq(f1: Val -> Val, f2: Val -> Val) -> Val -> Val {
-        return { let v = $0 as seq; return seq(v1: f1(v.v1), v2: f2(v.v2)) }
+        return { let v = $0 as seq; return seq(f1(v.v1), f2(v.v2)) }
     }
     
     func f_error(f: Val = void()) -> Val -> Val {
@@ -113,27 +93,27 @@ func simp(r: Rexp) -> (Rexp, Val -> Val) {
     }
     
     func f_rec(f: Val -> Val) -> Val -> Val {
-        return { let v = $0 as rec; return rec(x: v.x, v: f($0)) }
+        return { let v = $0 as rec; return rec(v.x, f($0)) }
     }
     
     switch r {
     case let r as Alt:
         let ( (r1, f1), (r2, f2) ) = ( simp(r.r1), simp(r.r2) )
         switch (r1, r2) {
-        case (is Null, _): return ( r2, { right(v: f2($0)) } )
-        case (_, is Null): return ( r1, { left(v: f1($0)) } )
-        case (_, _) where r1 == r2: return ( r1, { left(v: f1($0)) } )
-        default: return ( Alt(r1, r2), f_alt(f1, f2) )
+        case (is Null, _):          return ( r2, { right(f2($0)) } )
+        case (_, is Null):          return ( r1, { left(f1($0)) } )
+        case (_, _) where r1 == r2: return ( r1, { left(f1($0)) } )
+        default:                    return ( Alt(r1, r2), f_alt(f1, f2) )
         }
         
     case let r as Seq:
         let ((r1, f1), (r2, f2)) = (simp(r.r1), simp(r.r2))
         switch (r1, r2) {
-        case (is Null, _): return ( Null(), f_error() )
-        case (_, is Null): return ( Null(), f_error() )
-        case (is Empty, _): return ( r2, { seq(v1: f1(void()), v2: f2($0)) } )
-        case (_, is Empty): return ( r1, { seq(v1: f1($0), v2: f2(void())) } )
-        case let (r1, r2): return ( Seq(r1, r2), f_seq(f1, f2) )
+        case (is Null, _):          return ( Null(), f_error() )
+        case (_, is Null):          return ( Null(), f_error() )
+        case (is Empty, _):         return ( r2, { seq(f1(void()), f2($0)) } )
+        case (_, is Empty):         return ( r1, { seq(f1($0), f2(void())) } )
+        default:                    return ( Seq(r1, r2), f_seq(f1, f2) )
         }
         
     case let r as Rec:
@@ -144,59 +124,18 @@ func simp(r: Rexp) -> (Rexp, Val -> Val) {
     }
 }
 
-func count(r: Rexp) -> Int {
-    switch r {
-    case let r as BinaryRexp: return 1 + count(r.r1) + count(r.r2)
-    case let r as UnaryRexp: return 1 + count(r.r)
-    case let r as Ntimes: return 1 + count(r.r)
-    case let r as Mult: return 1 + count(r.r)
-    case let r as Not: return count(r.r)
-    case let r as Rec: return count(r.r)
-    default: return 1
-    }
-}
-
-func stringToRexp(var s: String) -> Rexp {
-    return s.count == 1 ? Char(s[0]) : Seq(Char(s[0]), stringToRexp(s[1..<s.count]))
-}
-
 func ==(r1: Rexp, r2: Rexp) -> Bool {
     switch (r1, r2) {
     case is (Null, Null): return true
     case is (Empty, Empty): return true
-    case let (r1 as Char, r2 as Char): return r1.c == r2.c
-    case let (r1 as Alt, r2 as Alt): return r1.r1 == r2.r1 && r1.r2 == r2.r2
-    case let (r1 as Seq, r2 as Seq): return r1.r1 == r2.r1 && r1.r2 == r2.r2
-    case let (r1 as Opt, r2 as Opt): return r1.r == r2.r
-    case let (r1 as Star, r2 as Star): return r1.r == r2.r
-    case let (r1 as Chars, r2 as Chars): return r1.c == r2.c
-    case let (r1 as Plus, r2 as Plus): return r1.r == r2.r
-    case let (r1 as Rec, r2 as Rec): return r1.r == r2.r
+    case let (r1 as Char, r2 as Char):      return r1.c == r2.c
+    case let (r1 as Alt, r2 as Alt):        return r1.r1 == r2.r1 && r1.r2 == r2.r2
+    case let (r1 as Seq, r2 as Seq):        return r1.r1 == r2.r1 && r1.r2 == r2.r2
+    case let (r1 as Opt, r2 as Opt):        return r1.r == r2.r
+    case let (r1 as Star, r2 as Star):      return r1.r == r2.r
+    case let (r1 as Chars, r2 as Chars):    return r1.c == r2.c
+    case let (r1 as Plus, r2 as Plus):      return r1.r == r2.r
+    case let (r1 as Rec, r2 as Rec):        return r1.r == r2.r
     default: return false
     }
 }
-
-func |(r1: Rexp, r2: Rexp) -> Alt { return Alt(r1, r2) }
-func |(r1: String, r2: String) -> Alt { return Alt(/r1, /r2) }
-func |(r1: Rexp, r2: String) -> Alt { return Alt(r1, /r2) }
-func |(r1: String, r2: Rexp) -> Alt { return Alt(/r1, r2) }
-
-func &(r1: Rexp, r2: Rexp) -> Seq { return Seq(r1, r2) }
-func &(r1: String, r2: String) -> Seq { return Seq(/r1, /r2) }
-func &(r1: String, r2: Rexp) -> Seq { return Seq(/r1, r2) }
-func &(r1: Rexp, r2: String) -> Seq { return Seq(r1, /r2) }
-
-func ^(r: Rexp, p:[Int]) -> Mult { return Mult(r: r, n: p[0], m: p[1]) }
-infix operator ~ {}
-func ~(x: String, r: Rexp) -> Rec { return Rec(x, r) }
-
-prefix func !(r: Rexp) -> Not { return Not(r) }
-prefix operator / {}
-prefix func /(s: String) -> Rexp { return stringToRexp(s) }
-
-postfix operator * {}
-postfix func *(r: Rexp) -> Star { return Star(r) }
-postfix operator + {}
-postfix func +(r: Rexp) -> Plus { return Plus(r) }
-postfix operator % {}
-postfix func %(r: Rexp) -> Opt { return Opt(r) }
