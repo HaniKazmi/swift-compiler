@@ -36,8 +36,8 @@ func eval_stmt(s: Stmt, var env: Env) -> Env {
     switch s {
     case is Skip: return env
     case let s as Assign: env.updateValue(eval_aexp(s.a, env), forKey: s.s); return env
-    case let s as If: if eval_bexp(s.a, env) { return eval_bl(s.bl1, env) } else { return eval_bl(s.bl2, env) }
-    case let s as While: if eval_bexp(s.b, env) { return eval_stmt(While(b: s.b, bl: s.bl), eval_bl(s.bl, env)) } else { return env }
+    case let s as If: return eval_bexp(s.a, env) ? eval_bl(s.bl1, env) : eval_bl(s.bl2, env)
+    case let s as While: return eval_bexp(s.b, env) ? eval_stmt(While(b: s.b, bl: s.bl), eval_bl(s.bl, env)) : env
     default: return env
     }
 }
@@ -50,4 +50,4 @@ func eval(bl: Block) -> Env {
     return eval_bl(bl, Env())
 }
 
-let Eval = { println(eval(satisfy(block()($0)).first!)) }
+let Eval = { println(eval(satisfy(lblock($0)).first!)) }

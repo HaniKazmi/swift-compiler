@@ -54,8 +54,8 @@ extension String {
     }
     
     var count: Int { return self.utf16Count }
-    var c: Character { return self[0] }
-    var s: String { return self[1..<self.count] }
+    var head: Character { return self[0] }
+    var tail: String { return self[1..<self.count] }
 }
 
 func count(r: Rexp) -> Int {
@@ -71,7 +71,7 @@ func count(r: Rexp) -> Int {
 }
 
 func stringToRexp(s: String) -> Rexp {
-    return s.count == 1 ? Char(s.c) : Seq(Char(s.c), stringToRexp(s.s))
+    return s.count == 1 ? Char(s.head) : Seq(Char(s.head), stringToRexp(s.tail))
 }
 
 func |(r1: Rexp, r2: Rexp) -> Alt { return Alt(r1, r2) }

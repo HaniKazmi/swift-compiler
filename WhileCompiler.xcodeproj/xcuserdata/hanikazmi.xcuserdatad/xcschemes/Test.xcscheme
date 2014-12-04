@@ -9,15 +9,15 @@
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "37B803D919DAF936004984B4"
-               BuildableName = "Regex"
-               BlueprintName = "Regex"
-               ReferencedContainer = "container:Regex.xcodeproj">
+               BlueprintIdentifier = "B901EEE21A0E7935007544DA"
+               BuildableName = "Test.xctest"
+               BlueprintName = "Test"
+               ReferencedContainer = "container:WhileCompiler.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -28,14 +28,24 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       buildConfiguration = "Debug">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B901EEE21A0E7935007544DA"
+               BuildableName = "Test.xctest"
+               BlueprintName = "Test"
+               ReferencedContainer = "container:WhileCompiler.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "37B803D919DAF936004984B4"
-            BuildableName = "Regex"
-            BlueprintName = "Regex"
-            ReferencedContainer = "container:Regex.xcodeproj">
+            BlueprintIdentifier = "B901EEE21A0E7935007544DA"
+            BuildableName = "Test.xctest"
+            BlueprintName = "Test"
+            ReferencedContainer = "container:WhileCompiler.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -48,15 +58,15 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable>
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "37B803D919DAF936004984B4"
-            BuildableName = "Regex"
-            BlueprintName = "Regex"
-            ReferencedContainer = "container:Regex.xcodeproj">
+            BlueprintIdentifier = "B901EEE21A0E7935007544DA"
+            BuildableName = "Test.xctest"
+            BlueprintName = "Test"
+            ReferencedContainer = "container:WhileCompiler.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -66,15 +76,15 @@
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable>
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "37B803D919DAF936004984B4"
-            BuildableName = "Regex"
-            BlueprintName = "Regex"
-            ReferencedContainer = "container:Regex.xcodeproj">
+            BlueprintIdentifier = "B901EEE21A0E7935007544DA"
+            BuildableName = "Test.xctest"
+            BlueprintName = "Test"
+            ReferencedContainer = "container:WhileCompiler.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

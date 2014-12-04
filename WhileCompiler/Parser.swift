@@ -11,15 +11,14 @@ import Foundation
 typealias C = CollectionType
 
 func CharParse(c: Character) -> String ->[(Character, String)] {
-    return { $0.c == c ? [($0.c, $0.s)] : [] }
+    return { $0.head == c ? [($0.head, $0.tail)] : [] }
 }
 
 func AltParse<I: C, T>(p: I -> [(T, I)], q: I -> [(T, I)]) -> I -> [(T, I)] {
     return { p($0) + q($0) }
 }
 
-func SeqParse<I: C, T, S>(p: I -> [(T, I)], q: I -> [(S, I)]) -> I -> [((T, S), I)]
-{
+func SeqParse<I: C, T, S>(p: I -> [(T, I)], q: I -> [(S, I)]) -> I -> [((T, S), I)] {
     return {
         var acc = [((T, S), I)]()
         for (head1, tail1) in p($0) {
@@ -91,16 +90,3 @@ func ==><I: C, T, S>(p: I -> [(T, I)], f: T -> S) -> I -> [(S, I)]  { return Fun
 func ~<I: C, T, S>(p: I -> [(T, I)], q: I -> [(S, I)]) -> I -> [((T, S), I)] { return SeqParse(p, q) }
 
 prefix func /(s: String) -> (String) -> [(String, String)] { return StringParse(s) }
-
-func E() -> (String) -> [(Int, String)] {
-   return  (lazy(T) ~ /"+" ~ lazy(E) ==> { let ((x, y), z) = $0; return x+z } ) || lazy(T)
-}
-
-func T() -> (String) -> [(Int, String)] {
-    return (lazy(F) ~ /"*" ~ lazy(T) ==> { let ((x, y), z) = $0; return x*z } ) || lazy(F)
-}
-
-func F() -> (String) -> [(Int, String)] {
-    return (/"(" ~ lazy(E) ~ /")" ==> { let ((x, y), z) = $0; return y } ) || NumParse()
-}
-

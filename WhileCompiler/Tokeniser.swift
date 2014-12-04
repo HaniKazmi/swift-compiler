@@ -71,7 +71,7 @@ func env(v: Val) -> token {
 func lex(r: Rexp, s:String) -> Val {
     if s.isEmpty { return nullable(r) ? mkeps(r) : void() }
     let (r_simp, f_rect) = simp(der(s[0], r))
-    return inj(r, s.c, f_rect(lex(r_simp, s.s)))
+    return inj(r, s.head, f_rect(lex(r_simp, s.tail)))
 }
 
 func tok(r: Rexp, s:String) -> token {

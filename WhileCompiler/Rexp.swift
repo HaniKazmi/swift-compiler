@@ -69,7 +69,7 @@ func der(c: Character, r: Rexp) -> Rexp {
 
 func ders(s: String, r:Rexp) -> Rexp {
     if s.isEmpty { return r }
-    return ders(s.s, simp(der(s.c, r)).0)
+    return ders(s.tail, simp(der(s.head, r)).0)
 }
 
 func matches(r: Rexp, s:String) -> Bool {
