@@ -1,31 +1,52 @@
 //
 //  Rexp.swift
-//  Regex
+//  WhileCompiler
 //
 //  Created by Hani on 01/10/2014.
 //  Copyright (c) 2014 Hani. All rights reserved.
 //
 
 class Rexp {}
-class UnaryRexp: Rexp { let r: Rexp; init(_ r: Rexp) { self.r = r } }
-class BinaryRexp: Rexp { let r1: Rexp, r2: Rexp; init(_ r1: Rexp, _ r2: Rexp) { self.r1 = r1; self.r2 = r2 } }
+class UnaryRexp: Rexp {
+    let r: Rexp;
+    init(_ r: Rexp) { self.r = r }
+}
+class BinaryRexp: Rexp {
+    let r1: Rexp, r2: Rexp
+    init(_ r1: Rexp, _ r2: Rexp) { self.r1 = r1; self.r2 = r2 }
+}
 
 class Null: Rexp {}
 class Empty: Rexp {}
-class Char: Rexp { let c: Character; init(_ c: Character) { self.c = c } }
+class Char: Rexp {
+    let c: Character
+    init(_ c: Character) { self.c = c }
+}
 
 class Alt: BinaryRexp {}
 class Seq: BinaryRexp {}
 class Star: UnaryRexp {}
 
-class Chars: Rexp { let c: [Character]; init(_ c: String) { self.c = Array(c) } }
+class Chars: Rexp {
+    let c: [Character]
+    init(_ c: String) { self.c = Array(c) }
+}
 class Plus: UnaryRexp {}
 class Opt: UnaryRexp {}
-class Ntimes: Rexp { let r: Rexp, n: Int; init(_ r: Rexp, _ n: Int) { self.r = r; self.n = n } }
-class Mult: Rexp { let r: Rexp, n: Int, m: Int; init(r: Rexp, n: Int, m: Int) { self.r = r; self.n = n; self.m = m} }
+class Ntimes: Rexp {
+    let r: Rexp, n: Int
+    init(_ r: Rexp, _ n: Int) { self.r = r; self.n = n }
+}
+class Mult: Rexp {
+    let r: Rexp, n: Int, m: Int
+    init(r: Rexp, n: Int, m: Int) { self.r = r; self.n = n; self.m = m }
+}
 class Not: UnaryRexp {}
 
-class Rec: Rexp { let x: String, r: Rexp; init(_ x: String, _ r: Rexp) { self.x = x; self.r = r } }
+class Rec: Rexp {
+    let x: String, r: Rexp
+    init(_ x: String, _ r: Rexp) { self.x = x; self.r = r }
+}
 
 func nullable(r: Rexp) -> Bool {
     switch r {
@@ -68,15 +89,14 @@ func der(c: Character, r: Rexp) -> Rexp {
 }
 
 func ders(s: String, r:Rexp) -> Rexp {
-    if s.isEmpty { return r }
-    return ders(s.tail, simp(der(s.head, r)).0)
+    return s.isEmpty ? r : ders(s.tail, simp(der(s.head, r)).r)
 }
 
 func matches(r: Rexp, s:String) -> Bool {
     return nullable(ders(s, r))
 }
 
-func simp(r: Rexp) -> (Rexp, Val -> Val) {
+func simp(r: Rexp) -> (r: Rexp, f: Val -> Val) {
     func f_alt(f1: Val -> Val, f2: Val -> Val) -> Val -> Val {
         return {
             if let v = $0 as? left { return left(f1(v.v)) }
@@ -89,7 +109,7 @@ func simp(r: Rexp) -> (Rexp, Val -> Val) {
     }
     
     func f_error(f: Val = void()) -> Val -> Val {
-        return { (v: Val) -> Val in void() }
+        return { (v) in f }
     }
     
     func f_rec(f: Val -> Val) -> Val -> Val {
@@ -120,14 +140,14 @@ func simp(r: Rexp) -> (Rexp, Val -> Val) {
         let (rs, f) = simp(r.r)
         return ( Rec(r.x, rs), f_rec(f) )
         
-    default: return ( r, { (v: Val) -> Val in v } )
+    default: return ( r, { $0 } )
     }
 }
 
 func ==(r1: Rexp, r2: Rexp) -> Bool {
     switch (r1, r2) {
-    case is (Null, Null): return true
-    case is (Empty, Empty): return true
+    case is (Null, Null):                   return true
+    case is (Empty, Empty):                 return true
     case let (r1 as Char, r2 as Char):      return r1.c == r2.c
     case let (r1 as Alt, r2 as Alt):        return r1.r1 == r2.r1 && r1.r2 == r2.r2
     case let (r1 as Seq, r2 as Seq):        return r1.r1 == r2.r1 && r1.r2 == r2.r2
@@ -139,3 +159,27 @@ func ==(r1: Rexp, r2: Rexp) -> Bool {
     default: return false
     }
 }
+
+func stringToRexp(s: String) -> Rexp {
+    return s.count == 1 ? Char(s.head) : Seq(Char(s.head), stringToRexp(s.tail))
+}
+
+func |(r1: Rexp, r2: Rexp) -> Alt { return Alt(r1, r2) }
+func |(r1: String, r2: String) -> Alt { return Alt(/r1, /r2) }
+func |(r1: Rexp, r2: String) -> Alt { return Alt(r1, /r2) }
+func |(r1: String, r2: Rexp) -> Alt { return Alt(/r1, r2) }
+
+func &(r1: Rexp, r2: Rexp) -> Seq { return Seq(r1, r2) }
+func &(r1: String, r2: String) -> Seq { return Seq(/r1, /r2) }
+func &(r1: String, r2: Rexp) -> Seq { return Seq(/r1, r2) }
+func &(r1: Rexp, r2: String) -> Seq { return Seq(r1, /r2) }
+
+func ^(r: Rexp, p:[Int]) -> Mult { return Mult(r: r, n: p[0], m: p[1]) }
+func ~(x: String, r: Rexp) -> Rec { return Rec(x, r) }
+
+prefix func !(r: Rexp) -> Not { return Not(r) }
+prefix func /(s: String) -> Rexp { return stringToRexp(s) }
+
+postfix func *(r: Rexp) -> Star { return Star(r) }
+postfix func +(r: Rexp) -> Plus { return Plus(r) }
+postfix func %(r: Rexp) -> Opt { return Opt(r) }

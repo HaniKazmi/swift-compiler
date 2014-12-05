@@ -1,11 +1,12 @@
 //
 //  Interpreter.swift
-//  Regex
+//  WhileCompiler
 //
 //  Created by Hani Kazmi on 03/12/2014.
 //  Copyright (c) 2014 Hani. All rights reserved.
 //
 
+import Foundation
 typealias Env = [String:Int]
 
 func eval_aexp(a: AExp, env: Env) -> Int {
@@ -35,19 +36,27 @@ func eval_bexp(b: BExp, env: Env) -> Bool {
 func eval_stmt(s: Stmt, var env: Env) -> Env {
     switch s {
     case is Skip: return env
-    case let s as Assign: env.updateValue(eval_aexp(s.a, env), forKey: s.s); return env
-    case let s as If: return eval_bexp(s.a, env) ? eval_bl(s.bl1, env) : eval_bl(s.bl2, env)
-    case let s as While: return eval_bexp(s.b, env) ? eval_stmt(While(b: s.b, bl: s.bl), eval_bl(s.bl, env)) : env
+    case let s as Assign: env[s.s] = eval_aexp(s.a, env); return env
+    case let s as If where eval_bexp(s.a, env): return eval_bl(s.bl1, env)
+    case let s as If: return eval_bl(s.bl2, env)
+    case let s as While where eval_bexp(s.b, env): return eval_stmt(While(b: s.b, bl: s.bl), eval_bl(s.bl, env))
+    case let s as Read: env[s.s] = readln().toInt()!; return env
+    case let s as WriteS: println(s.s); return env
+    case let s as Write: println(eval_aexp(s.s, env)); return env
     default: return env
     }
 }
 
 func eval_bl(bl: Block, env: Env) -> Env {
-    return isEmpty(bl) ? env : eval_bl(Array(bl[1..<bl.count]), eval_stmt(bl[0], env))
+    return isEmpty(bl) ? env : eval_bl(bl.tail, eval_stmt(bl.first!, env))
 }
 
 func eval(bl: Block) -> Env {
-    return eval_bl(bl, Env())
+    let startTime = CFAbsoluteTimeGetCurrent()
+    let x = eval_bl(bl, Env())
+    let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
+    println("Time elapsed: \(timeElapsed) s")
+    return x
 }
 
-let Eval = { println(eval(satisfy(lblock($0)).first!)) }
+let Eval = { println(eval(satisfy(lstmts($0)))) }

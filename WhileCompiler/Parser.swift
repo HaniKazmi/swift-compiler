@@ -1,6 +1,6 @@
 //
 //  Parser.swift
-//  Regex
+//  WhileCompiler
 //
 //  Created by Hani Kazmi on 09/11/2014.
 //  Copyright (c) 2014 Hani. All rights reserved.
@@ -40,6 +40,42 @@ func FunParse<I: C, T, S>(p: I -> [(T, I)], f: T -> S) -> I -> [(S, I)] {
     }
 }
 
+func TokParser(tok: Token) -> [Token] -> [(Token, [Token])] {
+    return {
+        if let t = $0.first {
+            return t == tok ? [(t, $0.tail)] : []
+        }
+        return []
+    }
+}
+
+func IdParser() -> [Token] -> [(String, [Token])] {
+    return {
+        if let t = $0.first as? T_ID {
+            return [(t.s, $0.tail)]
+        }
+        return []
+    }
+}
+
+func NumParser() -> [Token] -> [(Int, [Token])] {
+    return {
+        if let t = $0.first as? T_NUM {
+            return [(t.s.toInt()!, $0.tail)]
+        }
+        return []
+    }
+}
+
+func StringParser() -> [Token] -> [(String, [Token])] {
+    return {
+        if let t = $0.first as? T_STRING {
+            return [(t.s, $0.tail)]
+        }
+        return []
+    }
+}
+
 func StringParse(s: String) -> String -> [(String, String)] {
     return {
         if s.count > $0.count { return [] }
@@ -48,7 +84,7 @@ func StringParse(s: String) -> String -> [(String, String)] {
     }
 }
 
-func NumParse() -> String -> [(Int, String)] {
+func StringNumParse() -> String -> [(Int, String)] {
     return {
         let reg = "[0-9]+"
         if let match = $0.rangeOfString(reg, options: .RegularExpressionSearch) {
@@ -61,7 +97,7 @@ func NumParse() -> String -> [(Int, String)] {
     }
 }
 
-func IdParser() -> String -> [(String, String)] {
+func StringIdParser() -> String -> [(String, String)] {
     return {
         let reg = "[a-z][a-z0-9]*"
         if let match = $0.rangeOfString(reg, options: .RegularExpressionSearch) {
@@ -74,19 +110,13 @@ func IdParser() -> String -> [(String, String)] {
     }
 }
 
-func lazy<I, T>(p: () -> I -> T) -> I -> T {
-    return  { p()($0) }
-}
-
-func satisfy<I: C, T>(p: [(T, I)]) -> [T] {
-    return p.filter { isEmpty($0.1) }.map { $0.0 }
+func satisfy<I: C, T>(p: [(T, I)]) -> T {
+    return p.filter { isEmpty($0.1) }.map { $0.0 }.first!
 }
 
 func ||<I: C, T>(p: I -> [(T, I)], q: I -> [(T, I)]) -> I -> [(T, I)] { return AltParse(p, q) }
-
-infix operator ==> {}
 func ==><I: C, T, S>(p: I -> [(T, I)], f: T -> S) -> I -> [(S, I)]  { return FunParse(p, f) }
-
 func ~<I: C, T, S>(p: I -> [(T, I)], q: I -> [(S, I)]) -> I -> [((T, S), I)] { return SeqParse(p, q) }
 
 prefix func /(s: String) -> (String) -> [(String, String)] { return StringParse(s) }
+prefix func /(tok: Token) -> ([Token]) -> [(Token, [Token])] { return TokParser(tok) }

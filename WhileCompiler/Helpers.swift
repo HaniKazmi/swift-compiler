@@ -1,10 +1,12 @@
 //
 //  Helpers.swift
-//  Regex
+//  WhileCompiler
 //
 //  Created by Hani Kazmi on 08/11/2014.
 //  Copyright (c) 2014 Hani. All rights reserved.
 //
+
+import Foundation
 
 extension Rexp: Printable {
     var description: String {
@@ -42,6 +44,43 @@ extension Val: Printable {
     }
 }
 
+extension Stmt: Printable {
+    var description: String {
+        switch self {
+        case is Skip: return "Skip"
+        case let t as If: return "If(\(t.a), \(t.bl1), \(t.bl2))"
+        case let t as While: return "While(\(t.b), \(t.bl))"
+        case let t as Assign: return "Assign(\(t.s), \(t.a))"
+        case let t as Read: return "Read(\(t.s))"
+        case let t as WriteS: return "Write(\(t.s))"
+        case let t as Write: return "Write(\(t.s))"
+        default: return ""
+        }
+    }
+}
+
+extension AExp: Printable {
+    var description: String {
+        switch self {
+        case let t as Var: return "Var(\(t.s))"
+        case let t as Num: return "Num(\(t.i))"
+        case let t as Aop: return "Aop(\(t.o), \(t.a1), \(t.a2))"
+        default: return ""
+        }
+    }
+}
+
+extension BExp: Printable {
+    var description: String {
+        switch self {
+        case is True: return "True"
+        case is False: return "False"
+        case let t as Bop: return "Bop(\(t.o), \(t.a1), \(t.a2))"
+        default: return ""
+        }
+    }
+}
+
 extension String {
     subscript(index: Int) -> Character {
         return self[advance(self.startIndex, index)]
@@ -58,6 +97,12 @@ extension String {
     var tail: String { return self[1..<self.count] }
 }
 
+extension Array {
+    var tail: [T] {
+        return Array(self[1..<count])
+    }
+}
+
 func count(r: Rexp) -> Int {
     switch r {
     case let r as BinaryRexp:   return 1 + count(r.r1) + count(r.r2)
@@ -70,31 +115,19 @@ func count(r: Rexp) -> Int {
     }
 }
 
-func stringToRexp(s: String) -> Rexp {
-    return s.count == 1 ? Char(s.head) : Seq(Char(s.head), stringToRexp(s.tail))
+func lazy<I, T>(p: () -> I -> T) -> I -> T {
+    return  { p()($0) }
 }
 
-func |(r1: Rexp, r2: Rexp) -> Alt { return Alt(r1, r2) }
-func |(r1: String, r2: String) -> Alt { return Alt(/r1, /r2) }
-func |(r1: Rexp, r2: String) -> Alt { return Alt(r1, /r2) }
-func |(r1: String, r2: Rexp) -> Alt { return Alt(/r1, r2) }
+func readln() -> String {
+    let standardInput = NSFileHandle.fileHandleWithStandardInput()
+    let input = standardInput.availableData
+    return NSString(data: input, encoding:NSUTF8StringEncoding)!.stringByTrimmingCharactersInSet(.whitespaceAndNewlineCharacterSet())
+}
 
-func &(r1: Rexp, r2: Rexp) -> Seq { return Seq(r1, r2) }
-func &(r1: String, r2: String) -> Seq { return Seq(/r1, /r2) }
-func &(r1: String, r2: Rexp) -> Seq { return Seq(/r1, r2) }
-func &(r1: Rexp, r2: String) -> Seq { return Seq(r1, /r2) }
-
-func ^(r: Rexp, p:[Int]) -> Mult { return Mult(r: r, n: p[0], m: p[1]) }
-infix operator ~ { associativity left precedence 150}
-func ~(x: String, r: Rexp) -> Rec { return Rec(x, r) }
-
-prefix func !(r: Rexp) -> Not { return Not(r) }
+infix operator ~ { associativity left precedence 150 }
+infix operator ==> { precedence 140 }
 prefix operator / {}
-prefix func /(s: String) -> Rexp { return stringToRexp(s) }
-
 postfix operator * {}
-postfix func *(r: Rexp) -> Star { return Star(r) }
 postfix operator + {}
-postfix func +(r: Rexp) -> Plus { return Plus(r) }
 postfix operator % {}
-postfix func %(r: Rexp) -> Opt { return Opt(r) }

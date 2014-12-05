@@ -1,6 +1,6 @@
 //
 //  Tokeniser.swift
-//  Regex
+//  WhileCompiler
 //
 //  Created by Hani Kazmi on 27/10/2014.
 //  Copyright (c) 2014 Hani. All rights reserved.
@@ -8,12 +8,30 @@
 
 class Val {}
 class void: Val {}
-class char: Val { let c: Character; init(_ c: Character) { self.c = c} }
-class seq: Val { let v1: Val, v2: Val; init(_ v1: Val, _ v2: Val) { self.v1 = v1; self.v2 = v2 } }
-class left: Val { let v: Val; init(_ v: Val) { self.v = v} }
-class right: Val { let v: Val; init(_ v: Val) { self.v = v} }
-class stars: Val { let vs: [Val]; init(_ vs: [Val]) { self.vs = vs} }
-class rec: Val { let x: String, v: Val; init(_ x: String, _ v: Val) { self.x = x; self.v = v} }
+class char: Val {
+    let c: Character
+    init(_ c: Character) { self.c = c}
+}
+class seq: Val {
+    let v1: Val, v2: Val
+    init(_ v1: Val, _ v2: Val) { self.v1 = v1; self.v2 = v2 }
+}
+class left: Val {
+    let v: Val
+    init(_ v: Val) { self.v = v}
+}
+class right: Val {
+    let v: Val
+    init(_ v: Val) { self.v = v}
+}
+class stars: Val {
+    let vs: [Val]
+    init(_ vs: [Val]) { self.vs = vs}
+}
+class rec: Val {
+    let x: String, v: Val
+    init(_ x: String, _ v: Val) { self.x = x; self.v = v}
+}
 
 func mkeps(r: Rexp) -> Val {
     switch r {
@@ -55,7 +73,7 @@ func flatten(v: Val) -> String {
     }
 }
 
-typealias token = [[String:String]]
+typealias token = [(String,String)]
 
 func env(v: Val) -> token {
     switch v {
@@ -63,17 +81,17 @@ func env(v: Val) -> token {
     case let v as right:    return env(v.v)
     case let v as seq:      return env(v.v1) + env(v.v2)
     case let v as stars:    return v.vs.reduce([]) {$0 + env($1)}
-    case let v as rec:      return [[v.x:flatten(v.v)]] + env(v.v)
+    case let v as rec:      return [(v.x,flatten(v.v))] + env(v.v)
     default:                return []
     }
 }
 
 func lex(r: Rexp, s:String) -> Val {
     if s.isEmpty { return nullable(r) ? mkeps(r) : void() }
-    let (r_simp, f_rect) = simp(der(s[0], r))
+    let (r_simp, f_rect) = simp(der(s.head, r))
     return inj(r, s.head, f_rect(lex(r_simp, s.tail)))
 }
 
-func tok(r: Rexp, s:String) -> token {
+func tok(s:String, r: Rexp = TOKEN) -> token {
     return env(lex(r, s))
 }

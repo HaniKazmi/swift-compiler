@@ -1,77 +1,119 @@
 //
 //  ParseTree.swift
-//  Regex
+//  WhileCompiler
 //
 //  Created by Hani Kazmi on 03/12/2014.
 //  Copyright (c) 2014 Hani. All rights reserved.
 //
 
-protocol Stmt {}
-protocol AExp {}
-protocol BExp {}
+class Stmt {}
+class AExp {}
+class BExp {}
 
 typealias Block = [Stmt]
 
-struct Skip: Stmt {}
-struct If: Stmt { let a: BExp, bl1: Block, bl2: Block }
-struct While: Stmt { let b: BExp, bl: Block }
-struct Assign: Stmt { let s: String, a: AExp }
+class Skip: Stmt {}
+class If: Stmt {
+    let a: BExp, bl1: Block, bl2: Block
+    init(a: BExp, bl1: Block, bl2: Block) {self.a = a; self.bl1 = bl1; self.bl2 = bl2 }
+}
+class While: Stmt {
+    let b: BExp, bl: Block
+    init(b: BExp, bl: Block) {self.b = b; self.bl = bl }
+}
+class Assign: Stmt {
+    let s: String, a: AExp
+    init(s: String, a: AExp) { self.s = s; self.a = a }
+}
+class Read: Stmt {
+    let s: String
+    init(_ s: String) { self.s = s }
+}
+class WriteS: Stmt {
+    let s: String
+    init(_ s: String) { self.s = s }
+}
+class Write: Stmt {
+    let s: AExp
+    init(_ s: AExp) { self.s = s }
+}
 
-struct Var: AExp { let s: String }
-struct Num: AExp { let i: Int }
-struct Aop: AExp { let o: String, a1: AExp, a2: AExp }
+class Var: AExp {
+    let s: String
+    init(_ s: String) { self.s = s }
+}
+class Num: AExp {
+    let i: Int
+    init(_ i: Int) { self.i = i }
+}
+class Aop: AExp {
+    let o: String, a1: AExp, a2: AExp
+    init(o: String, a1: AExp, a2: AExp) { self.o = o; self.a1 = a1; self.a2 = a2 }
+}
 
-struct True: BExp {}
-struct False: BExp {}
-struct Bop: BExp { let o: String, a1: AExp, a2: AExp }
+class True: BExp {}
+class False: BExp {}
+class Bop: BExp {
+    let o: String, a1: AExp, a2: AExp
+    init(o: String, a1: AExp, a2: AExp) { self.o = o; self.a1 = a1; self.a2 = a2 }
+}
 
-func aexp() -> (String) -> [(AExp, String)] {
-    func aop(s: String) -> String -> [(AExp, String)] {
-        return lTe ~ /s ~ laexp ==> { let ((x, _), z) = $0; return Aop(o: s, a1: x, a2: z) } }
+func aexp() -> ([Token]) -> [(AExp, [Token])] {
+    func aop(s: String) -> [Token] -> [(AExp, [Token])] {
+        return lTe ~ /T_OP(s: s) ~ laexp ==> { let ((x, _), z) = $0; return Aop(o: s, a1: x, a2: z) }
+    }
     return aop("+") || aop("-") || lTe
 }
 let laexp = lazy(aexp)
 
-func Te() -> (String) -> [(AExp, String)] {
-    func aop(s: String) -> (String) -> [(AExp, String)] {
-        return lFa ~ /s ~ lTe ==> { let ((x, _), z) = $0; return Aop(o: s, a1: x, a2: z) } }
+func Te() -> ([Token]) -> [(AExp, [Token])] {
+    func aop(s: String) -> ([Token]) -> [(AExp, [Token])] {
+        return lFa ~ /T_OP(s: s) ~ lTe ==> { let ((x, _), z) = $0; return Aop(o: s, a1: x, a2: z) }
+    }
     return aop("*") || aop("/") || lFa
 }
 let lTe = lazy(Te)
 
-func Fa() -> (String) -> [(AExp, String)] {
-    return (/"(" ~ laexp ~ /")" ==> { let ((x, y), z) = $0; return y } ) || ( IdParser() ==> { Var(s: $0) } ) || ( NumParse() ==> { Num(i: $0) } )
+func Fa() -> ([Token]) -> [(AExp, [Token])] {
+    return (/T_PAREN(s: "(") ~ laexp ~ /T_PAREN(s: ")") ==> { let ((x, y), z) = $0; return y } ) ||
+        IdParser() ==> { Var($0) }  || NumParser() ==> { Num($0) }
 }
 let lFa = lazy(Fa)
 
-func bexp() -> (String) -> [(BExp, String)] {
-    func b(s: String) -> (String) -> [(BExp, String)] {
-        return (laexp ~ /s ~ laexp) ==> { let ((x, _), z) = $0; return Bop(o: s, a1: x, a2: z) } }
+func bexp() -> ([Token]) -> [(BExp, [Token])] {
+    func b(s: String) -> ([Token]) -> [(BExp, [Token])] {
+        return (laexp ~ /T_OP(s: s) ~ laexp) ==> { let ((x, _), z) = $0; return Bop(o: s, a1: x, a2: z) } }
     
     return b("==") || b("!=") || b("<") || b(">") ||
-        ( /"true" ==> {  $0;return True() } ) ||
-        ( /"false" ==> { $0; return False() } ) ||
-        ( (/"(" ~ lbexp ~ /")") ==> { let ((x, y), z) = $0;  return y } )
+        /T_KWD(s: "true") ==> { _ in True() } ||
+        /T_KWD(s: "false") ==> { _ in False() } ||
+        /T_PAREN(s: "(") ~ lbexp ~ /T_PAREN(s: ")") ==> { let ((x, y), z) = $0;  return y }
 }
 let lbexp = lazy(bexp)
 
-func stmt() -> (String) -> [(Stmt, String)] {
-    return ( /"skip" ==> { $0; return Skip() } ) ||
-        ( (IdParser() ~ /":=" ~ laexp) ==> { let ((x, _), z) = $0; return Assign(s: x, a: z) } ) ||
-        ( (/"if" ~ lbexp ~ /"then" ~ lblock ~ /"else" ~ lblock) ==>
-            { let (((((_,y),_),u),_),w) = $0; return If(a: y, bl1: u, bl2: w) } ) ||
-        ( (/"while" ~ lbexp ~ /"do" ~ lblock) ==> { let (((_, y), _), w) = $0; return While(b: y, bl: w) } )
+func stmt() -> ([Token]) -> [(Stmt, [Token])] {
+    typealias ret = [Token] -> [(Stmt, [Token])]
+    let skip: ret = /T_KWD(s: "skip") ==> { _ in Skip() }
+    let assign: ret = IdParser() ~ /T_OP(s: ":=") ~ laexp ==> { let ((x, _), z) = $0; return Assign(s: x, a: z) }
+    let pIf: ret = /T_KWD(s: "if") ~ lbexp ~ /T_KWD(s: "then") ~ lblock ~ /T_KWD(s: "else") ~ lblock ==>
+        { let (((((_,y),_),u),_),w) = $0; return If(a: y, bl1: u, bl2: w) }
+    let pWhile: ret = /T_KWD(s: "while") ~ lbexp ~ /T_KWD(s: "do") ~ lblock ==> { let (((_, y), _), w) = $0; return While(b: y, bl: w) }
+    let read: ret = /T_KWD(s: "read") ~ IdParser() ==> { let (_, y) = $0; return Read(y) }
+    let writeS: ret = /T_KWD(s: "write") ~ StringParser() ==> { let (_, y) = $0; return WriteS(y) }
+    let write: ret = /T_KWD(s: "write") ~ laexp ==> { let (_, y) = $0; return Write(y) }
+    
+    return skip || assign || pIf || pWhile || writeS || write || read
 }
 let lstmt = lazy(stmt)
 
-func stmts() -> (String) -> [(Block, String)] {
-    return ((lstmt ~ /";" ~ lstmts) ==> { let ((x, _), z) = $0; return [x] + z } ) ||
-        ( lstmt ==> { [$0] } )
+func stmts() -> ([Token]) -> [(Block, [Token])] {
+    return lstmt ~ /T_SEMI() ~ lstmts ==> { let ((x, _), z) = $0; return [x] + z } ||
+        lstmt ==> { [$0] }
 }
 let lstmts = lazy(stmts)
 
-func block() -> (String) -> [(Block, String)] {
-    return   ((/"{" ~ lstmts ~ /"}") ==> { let ((_, y), _) = $0; return y} ) ||
-        (lstmt ==> { [$0] })
+func block() -> ([Token]) -> [(Block, [Token])] {
+    return /T_PAREN(s: "{") ~ lstmts ~ /T_PAREN(s: "}") ==> { let ((_, y), _) = $0; return y} ||
+        lstmt ==> { [$0] }
 }
 let lblock = lazy(block)
