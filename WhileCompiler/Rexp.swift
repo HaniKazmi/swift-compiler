@@ -164,6 +164,7 @@ func stringToRexp(s: String) -> Rexp {
     return s.count == 1 ? Char(s.head) : Seq(Char(s.head), stringToRexp(s.tail))
 }
 
+// MARK: - Operators
 func |(r1: Rexp, r2: Rexp) -> Alt { return Alt(r1, r2) }
 func |(r1: String, r2: String) -> Alt { return Alt(/r1, /r2) }
 func |(r1: Rexp, r2: String) -> Alt { return Alt(r1, /r2) }

@@ -8,6 +8,7 @@
 
 import Foundation
 
+// MARK: - Printable Protocol
 extension Rexp: Printable {
     var description: String {
         switch self {
@@ -81,6 +82,7 @@ extension BExp: Printable {
     }
 }
 
+// MARK: - Extensions
 extension String {
     subscript(index: Int) -> Character {
         return self[advance(self.startIndex, index)]
@@ -103,6 +105,7 @@ extension Array {
     }
 }
 
+// MARK: - Helper functions
 func count(r: Rexp) -> Int {
     switch r {
     case let r as BinaryRexp:   return 1 + count(r.r1) + count(r.r2)
@@ -121,10 +124,11 @@ func lazy<I, T>(p: () -> I -> T) -> I -> T {
 
 func readln() -> String {
     let standardInput = NSFileHandle.fileHandleWithStandardInput()
-    let input = standardInput.availableData
-    return NSString(data: input, encoding:NSUTF8StringEncoding)!.stringByTrimmingCharactersInSet(.whitespaceAndNewlineCharacterSet())
+    let data = NSString(data: standardInput.availableData, encoding:NSUTF8StringEncoding)!
+    return data.stringByTrimmingCharactersInSet(.whitespaceAndNewlineCharacterSet())
 }
 
+// MARK: - Custom Operators
 infix operator ~ { associativity left precedence 150 }
 infix operator ==> { precedence 140 }
 prefix operator / {}

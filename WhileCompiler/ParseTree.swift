@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Hani. All rights reserved.
 //
 
+// MARK: - Tree declaration
 class Stmt {}
 class AExp {}
 class BExp {}
@@ -58,6 +59,7 @@ class Bop: BExp {
     init(o: String, a1: AExp, a2: AExp) { self.o = o; self.a1 = a1; self.a2 = a2 }
 }
 
+// MARK: - Arithmetic expressions
 func aexp() -> ([Token]) -> [(AExp, [Token])] {
     func aop(s: String) -> [Token] -> [(AExp, [Token])] {
         return lTe ~ /T_OP(s: s) ~ laexp ==> { let ((x, _), z) = $0; return Aop(o: s, a1: x, a2: z) }
@@ -80,6 +82,7 @@ func Fa() -> ([Token]) -> [(AExp, [Token])] {
 }
 let lFa = lazy(Fa)
 
+// MARK: - Boolean expressions
 func bexp() -> ([Token]) -> [(BExp, [Token])] {
     func b(s: String) -> ([Token]) -> [(BExp, [Token])] {
         return (laexp ~ /T_OP(s: s) ~ laexp) ==> { let ((x, _), z) = $0; return Bop(o: s, a1: x, a2: z) } }
@@ -91,6 +94,7 @@ func bexp() -> ([Token]) -> [(BExp, [Token])] {
 }
 let lbexp = lazy(bexp)
 
+// MARK: - Statements
 func stmt() -> ([Token]) -> [(Stmt, [Token])] {
     typealias ret = [Token] -> [(Stmt, [Token])]
     let skip: ret = /T_KWD(s: "skip") ==> { _ in Skip() }

@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Hani. All rights reserved.
 //
 
+// MARK: - Rexp
 let allLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWXYZ"
 let allNums = "0123456789"
 let allSym = "_.-€"
@@ -32,6 +33,7 @@ let TOKEN = (
         ("ident"    ~   IDENT     )   |
         ("num"      ~   NUM       )   )*
 
+// MARK: - Token declaration
 protocol Token {}
 
 struct T_SEMI: Token {}
