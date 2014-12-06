@@ -59,4 +59,5 @@ func eval(bl: Block) -> Env {
     return x
 }
 
+/// Given a list of tokens, runs the resulting program and prints the variables
 let Eval = { println(eval(satisfy(lstmts($0)))) }

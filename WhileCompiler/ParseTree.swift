@@ -114,6 +114,7 @@ func stmts() -> ([Token]) -> [(Block, [Token])] {
     return lstmt ~ /T_SEMI() ~ lstmts ==> { let ((x, _), z) = $0; return [x] + z } ||
         lstmt ==> { [$0] }
 }
+/// Converts tokens into a parse tree
 let lstmts = lazy(stmts)
 
 func block() -> ([Token]) -> [(Block, [Token])] {

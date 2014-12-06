@@ -88,6 +88,7 @@ extension String {
         return self[advance(self.startIndex, index)]
     }
     
+    /// Returns the substring from the given range
     subscript(range: Range<Int>) -> String {
         let start = advance(self.startIndex, range.startIndex)
         let end = advance(self.startIndex, range.endIndex)
@@ -95,11 +96,14 @@ extension String {
     }
     
     var count: Int { return self.utf16Count }
+    /// Returns the first character
     var head: Character { return self[0] }
+    /// Returns the original string minus the first character
     var tail: String { return self[1..<self.count] }
 }
 
 extension Array {
+    /// Returns the original array minus the first element
     var tail: [T] {
         return Array(self[1..<count])
     }
@@ -118,10 +122,12 @@ func count(r: Rexp) -> Int {
     }
 }
 
+/// Returns a closure which is only evaluated when needed
 func lazy<I, T>(p: () -> I -> T) -> I -> T {
     return  { p()($0) }
 }
 
+/// Reads a line from stdin
 func readln() -> String {
     let standardInput = NSFileHandle.fileHandleWithStandardInput()
     let data = NSString(data: standardInput.availableData, encoding:NSUTF8StringEncoding)!

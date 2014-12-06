@@ -48,6 +48,7 @@ class Rec: Rexp {
     init(_ x: String, _ r: Rexp) { self.x = x; self.r = r }
 }
 
+/// Returns 'true' iff r matches the empty string
 func nullable(r: Rexp) -> Bool {
     switch r {
     case is Null:           return false
@@ -67,6 +68,7 @@ func nullable(r: Rexp) -> Bool {
     }
 }
 
+/// Calculates the Brzozowski derivative of r with respect to c
 func der(c: Character, r: Rexp) -> Rexp {
     switch r {
     case is Null:           return Null()
@@ -88,14 +90,21 @@ func der(c: Character, r: Rexp) -> Rexp {
     }
 }
 
+/// Calculates the Brzozowski derivative of r with respect to s.
+///
+/// Iterates over s, calling func der with each character
 func ders(s: String, r:Rexp) -> Rexp {
     return s.isEmpty ? r : ders(s.tail, simp(der(s.head, r)).r)
 }
 
+/// Returns 'true' iff expression r can match s
 func matches(r: Rexp, s:String) -> Bool {
     return nullable(ders(s, r))
 }
 
+/// Simplifies a given Rexp
+///
+/// :returns: A 2-tuple of the simplified expression, and a function to recover to recover the original value
 func simp(r: Rexp) -> (r: Rexp, f: Val -> Val) {
     func f_alt(f1: Val -> Val, f2: Val -> Val) -> Val -> Val {
         return {
@@ -160,6 +169,7 @@ func ==(r1: Rexp, r2: Rexp) -> Bool {
     }
 }
 
+/// Converts a string to a Rexp which matches that string
 func stringToRexp(s: String) -> Rexp {
     return s.count == 1 ? Char(s.head) : Seq(Char(s.head), stringToRexp(s.tail))
 }
