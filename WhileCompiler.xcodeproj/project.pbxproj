@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B92A51271A36366C00C2271D /* Compiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92A51261A36366C00C2271D /* Compiler.swift */; };
 		B9DF2DE81A30A58C00CD943C /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9DF2DE01A30A58C00CD943C /* Helpers.swift */; };
 		B9DF2DE91A30A58C00CD943C /* Interpreter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9DF2DE11A30A58C00CD943C /* Interpreter.swift */; };
 		B9DF2DEA1A30A58C00CD943C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9DF2DE21A30A58C00CD943C /* main.swift */; };
@@ -31,6 +32,7 @@
 
 /* Begin PBXFileReference section */
 		37B803DA19DAF936004984B4 /* WhileCompiler */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = WhileCompiler; sourceTree = BUILT_PRODUCTS_DIR; };
+		B92A51261A36366C00C2271D /* Compiler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Compiler.swift; sourceTree = SOURCE_ROOT; };
 		B9DF2DE01A30A58C00CD943C /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Helpers.swift; path = WhileCompiler/Helpers.swift; sourceTree = SOURCE_ROOT; };
 		B9DF2DE11A30A58C00CD943C /* Interpreter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Interpreter.swift; path = WhileCompiler/Interpreter.swift; sourceTree = SOURCE_ROOT; };
 		B9DF2DE21A30A58C00CD943C /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = main.swift; path = WhileCompiler/main.swift; sourceTree = SOURCE_ROOT; };
@@ -79,6 +81,7 @@
 				B9DF2DE31A30A58C00CD943C /* Parser.swift */,
 				B9DF2DE41A30A58C00CD943C /* ParseTree.swift */,
 				B9DF2DE11A30A58C00CD943C /* Interpreter.swift */,
+				B92A51261A36366C00C2271D /* Compiler.swift */,
 			);
 			name = WhileCompiler;
 			path = Regex;
@@ -141,6 +144,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B9DF2DEE1A30A58C00CD943C /* Tokeniser.swift in Sources */,
+				B92A51271A36366C00C2271D /* Compiler.swift in Sources */,
 				B9DF2DE91A30A58C00CD943C /* Interpreter.swift in Sources */,
 				B9DF2DE81A30A58C00CD943C /* Helpers.swift in Sources */,
 				B9DF2DEA1A30A58C00CD943C /* main.swift in Sources */,
