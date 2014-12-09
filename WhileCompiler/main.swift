@@ -17,6 +17,6 @@ func tokenise(path: String) -> [Token] {
 }
 
 let startTime = CFAbsoluteTimeGetCurrent()
-Compile(tokenise("test.txt"))
+Compile(tokenise("test1.txt"))
 let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
 println("Time elapsed: \(timeElapsed) s")

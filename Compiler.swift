@@ -6,8 +6,6 @@
 //  Copyright (c) 2014 Hani. All rights reserved.
 //
 
-import Foundation
-
 typealias Mem = [String:Int]
 typealias Instrs = [String]
 
@@ -55,15 +53,18 @@ func compile_stmt(s: Stmt, env: Mem) -> (i: Instrs, e: Env) {
         let (e_bl, e2) = compile_bl(s.bl2, e)
         let If = compile_bexp(s.a, env, if_else)
         let Then = i_bl + ["goto \(if_end)"]
-        let Else = ["\(if_else):"] + e_bl + ["\(if_end):"]
+        let Else = ["\n\(if_else):\n"] + e_bl + ["\n\(if_end):\n"]
         return (If + Then + Else, e2)
     case let s as While:
         let w_begin = calc_labl("loop_begin")
         let w_end = calc_labl("loop_end")
         let (bl, e) = compile_bl(s.bl, env)
-        let test = ["\(w_begin):"] + compile_bexp(s.b, env, w_end)
-        let asm = bl + ["goto \(w_begin)"] + ["\(w_end):"]
+        let test = ["\n\(w_begin):\n"] + compile_bexp(s.b, env, w_end)
+        let asm = bl + ["goto \(w_begin)"] + ["\n\(w_end):\n"]
         return (test + asm, e)
+    case let s as Read: let e = calc_store(env, s.s); return ([lRead] + ["istore \(e[s.s]!)"], e)
+    case let s as WriteS: return (["ldc \"\(s.s)\""] + [lWriteS], env)
+    case let s as Write: return (compile_aexp(s.s, env) + [lWrite], env)
     default: return ([], env)
     }
 }
@@ -76,31 +77,7 @@ func compile_bl(bl: Block, env: Mem) -> (i: Instrs, e: Env) {
 }
 
 func compile(bl: Block) -> String {
-    return library + compile_bl(bl, Mem()).i.reduce("") { $0 + $1 + "\n" } + end
+    return Header + compile_bl(bl, Mem()).i.reduce("") { $0 + $1 + "\n" } + Footer
 }
 
 let Compile = { println(compile(satisfy(lstmts($0)))) }
-
-
-let library = ".class public XXX.XXX\n" +
-".super java/lang/Object\n" +
-".method public <init>()V\n" +
-"aload_0\n" +
-"invokenonvirtual java/lang/Object/<init>()V\n" +
-"return\n" +
-".end method\n\n" +
-".method public static write(I)V\n" +
-".limit locals 5\n" +
-".limit stack 5\n" +
-"iload 0\n" +
-"getstatic java/lang/System/out Ljava/io/PrintStream;\n" +
-"swap\n" +
-"invokevirtual java/io/PrintStream/println(I)V\n" +
-"return\n" +
-".end method\n\n" +
-".method public static main([Ljava/lang/String;)V\n" +
-".limit stack 5\n" +
-".limit locals 100\n\n"
-
-let end = "\nreturn\n" +
-".end method\n"
