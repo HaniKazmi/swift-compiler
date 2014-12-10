@@ -23,10 +23,10 @@ func compile_aexp(a: AExp, env: Mem) -> Instrs {
 
 func compile_bexp(b: BExp, env: Mem, jmp: String) -> Instrs {
     switch b {
-    case let b as Bop where b.o == "=": return compile_aexp(b.a1, env) + compile_aexp(b.a2, env) + ["if_cmpne \(jmp)"]
-    case let b as Bop where b.o == "!=": return compile_aexp(b.a1, env) + compile_aexp(b.a2, env) + ["if_cmpeq \(jmp)"]
-    case let b as Bop where b.o == ">": return compile_aexp(b.a1, env) + compile_aexp(b.a2, env) + ["if_cmple \(jmp)"]
-    case let b as Bop where b.o == "<": return compile_aexp(b.a1, env) + compile_aexp(b.a2, env) + ["if_cmpge \(jmp)"]
+    case let b as Bop where b.o == "=": return compile_aexp(b.a1, env) + compile_aexp(b.a2, env) + ["if_icmpne \(jmp)"]
+    case let b as Bop where b.o == "!=": return compile_aexp(b.a1, env) + compile_aexp(b.a2, env) + ["if_icmpeq \(jmp)"]
+    case let b as Bop where b.o == ">": return compile_aexp(b.a1, env) + compile_aexp(b.a2, env) + ["if_icmple \(jmp)"]
+    case let b as Bop where b.o == "<": return compile_aexp(b.a1, env) + compile_aexp(b.a2, env) + ["if_icmpge \(jmp)"]
     default: return []
     }
 }
@@ -80,4 +80,12 @@ func compile(bl: Block) -> String {
     return Header + compile_bl(bl, Mem()).i.reduce("") { $0 + $1 + "\n" } + Footer
 }
 
-let Compile = { println(compile(satisfy(lstmts($0)))) }
+let Compile = { compile(satisfy(lstmts($0))) }
+
+func compile_file(path: String = Process.arguments[1]) {
+    let content = readfile(path)
+    let file_name = path.lastPathComponent.componentsSeparatedByString(".")[0]
+    let compiled = Compile(tokeniser(tok(content))).stringByReplacingOccurrencesOfString("XXX", withString: file_name)
+    writefile(compiled, file_name + ".j")
+    execJasmin(file_name + ".j")
+}

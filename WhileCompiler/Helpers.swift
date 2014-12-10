@@ -134,6 +134,18 @@ func readln() -> String {
     return data.stringByTrimmingCharactersInSet(.whitespaceAndNewlineCharacterSet())
 }
 
+func readfile(path: String) -> String {
+    return String(contentsOfFile: path, encoding: NSUTF8StringEncoding, error: nil)!
+}
+
+func writefile(file: String, path: String) {
+    file.writeToFile(path, atomically: true, encoding: NSUTF8StringEncoding)
+}
+
+func execJasmin(path: String) {
+    let task = NSTask.launchedTaskWithLaunchPath("java -jar jasmin.jar", arguments: [path])
+}
+
 // MARK: - Custom Operators
 infix operator ~ { associativity left precedence 150 }
 infix operator ==> { precedence 140 }

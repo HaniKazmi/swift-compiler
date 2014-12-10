@@ -10,13 +10,7 @@ import Foundation
 
 let dir = (NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.AllDomainsMask, true) as? [String])![0]
 
-func tokenise(path: String) -> [Token] {
-    let path = dir.stringByAppendingPathComponent(path);
-    let content = String(contentsOfFile: path, encoding: NSUTF8StringEncoding, error: nil)!
-    return tokeniser(tok(content))
-}
-
 let startTime = CFAbsoluteTimeGetCurrent()
-Compile(tokenise("test1.txt"))
+compile_file(path: "/Users/hanikazmi/Documents/test.txt")
 let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
 println("Time elapsed: \(timeElapsed) s")
