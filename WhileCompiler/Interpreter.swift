@@ -6,8 +6,6 @@
 //  Copyright (c) 2014 Hani. All rights reserved.
 //
 
-import Foundation
-
 typealias Env = [String:Int]
 
 func eval_aexp(a: AExp, env: Env) -> Int {
@@ -53,11 +51,7 @@ func eval_bl(bl: Block, env: Env) -> Env {
 }
 
 func eval(bl: Block) -> Env {
-    let startTime = CFAbsoluteTimeGetCurrent()
-    let x = eval_bl(bl, Env())
-    let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
-    println("Time elapsed: \(timeElapsed) s")
-    return x
+    return eval_bl(bl, Env())
 }
 
 /// Given a list of tokens, runs the resulting program and prints the variables

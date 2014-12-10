@@ -63,7 +63,7 @@ func compile_stmt(s: Stmt, env: Mem) -> (i: Instrs, e: Env) {
         let asm = bl + ["goto \(w_begin)"] + ["\n\(w_end):\n"]
         return (test + asm, e)
     case let s as Read: let e = calc_store(env, s.s); return ([lRead] + ["istore \(e[s.s]!)"], e)
-    case let s as WriteS: return (["ldc \"\(s.s)\""] + [lWriteS], env)
+    case let s as WriteS: return (["ldc \(s.s)"] + [lWriteS], env)
     case let s as Write: return (compile_aexp(s.s, env) + [lWrite], env)
     default: return ([], env)
     }
@@ -87,5 +87,5 @@ func compile_file(path: String = Process.arguments[1]) {
     let file_name = path.lastPathComponent.componentsSeparatedByString(".")[0]
     let compiled = Compile(tokeniser(tok(content))).stringByReplacingOccurrencesOfString("XXX", withString: file_name)
     writefile(compiled, file_name + ".j")
-    execJasmin(file_name + ".j")
+    execJasmin(file_name)
 }

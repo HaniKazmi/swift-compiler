@@ -135,7 +135,7 @@ func readln() -> String {
 }
 
 func readfile(path: String) -> String {
-    return String(contentsOfFile: path, encoding: NSUTF8StringEncoding, error: nil)!
+    return String(contentsOfFile: path)!
 }
 
 func writefile(file: String, path: String) {
@@ -143,7 +143,8 @@ func writefile(file: String, path: String) {
 }
 
 func execJasmin(path: String) {
-    let task = NSTask.launchedTaskWithLaunchPath("java -jar jasmin.jar", arguments: [path])
+    system("java -jar jasmin.jar \(path).j")
+    system("java \(path)/\(path)")
 }
 
 // MARK: - Custom Operators
