@@ -14,7 +14,7 @@ let allSym = "_.-€"
 let CHAR = Chars(allLetters)
 let DIGIT = Chars(allNums)
 
-let KEYWORDS    = "while" | "if" | "then" | "else" | "do" | "for" | "to" | "true" | "false" | "read" | "write" | "skip"
+let KEYWORDS    = "while" | "if" | "then" | "else" | "do" | "for" | "upto" | "true" | "false" | "read" | "write" | "skip"
 let OPERATORS   = "+" | "-" | "*" | "%" | "/" | "==" | "!=" | ">" | "<" | ":=" | "&&" | "||"
 let STRINGS     = "\"" & CHAR* & "\""
 let PAREN       = "(" | ")" | "{" | "}"

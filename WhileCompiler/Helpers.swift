@@ -51,6 +51,7 @@ extension Stmt: Printable {
         case is Skip: return "Skip"
         case let t as If: return "If(\(t.a), \(t.bl1), \(t.bl2))"
         case let t as While: return "While(\(t.b), \(t.bl))"
+        case let t as For: return "For(\(t.a), \(t.i), \(t.bl))"
         case let t as Assign: return "Assign(\(t.s), \(t.a))"
         case let t as Read: return "Read(\(t.s))"
         case let t as WriteS: return "Write(\(t.s))"
@@ -134,10 +135,12 @@ func readln() -> String {
     return data.stringByTrimmingCharactersInSet(.whitespaceAndNewlineCharacterSet())
 }
 
+// Opens a file and returns it as a String
 func readfile(path: String) -> String {
     return String(contentsOfFile: path)!
 }
 
+/// Write a string to a file
 func writefile(file: String, path: String) {
     file.writeToFile(path, atomically: true, encoding: NSUTF8StringEncoding)
 }

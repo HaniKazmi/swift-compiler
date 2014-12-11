@@ -62,6 +62,15 @@ func compile_stmt(s: Stmt, env: Mem) -> (i: Instrs, e: Env) {
         let test = ["\n\(w_begin):\n"] + compile_bexp(s.b, env, w_end)
         let asm = bl + ["goto \(w_begin)"] + ["\n\(w_end):\n"]
         return (test + asm, e)
+    case let s as For:
+        let (s1, e) = compile_stmt(s.a, env)
+        let f_begin = calc_labl("loop_begin")
+        let f_end = calc_labl("loop_end")
+        let (bl, e2) = compile_bl(s.bl, e)
+        let bl2 = bl + ["iload \(e[s.a.s]!)", "ldc 1", "iadd", "istore \(e[s.a.s]!)"]
+        let test = ["\n\(f_begin):\n"] + compile_bexp(Bop(o: "<", a1: Var(s.a.s), a2: s.i), e, f_end)
+        let asm = bl2 + ["goto \(f_begin)"] + ["\n\(f_end):\n"]
+        return (s1 + test + asm, e2)
     case let s as Read: let e = calc_store(env, s.s); return ([lRead] + ["istore \(e[s.s]!)"], e)
     case let s as WriteS: return (["ldc \(s.s)"] + [lWriteS], env)
     case let s as Write: return (compile_aexp(s.s, env) + [lWrite], env)
@@ -82,6 +91,7 @@ func compile(bl: Block) -> String {
 
 let Compile = { compile(satisfy(lstmts($0))) }
 
+/// Compiles the path passed in as either the function parameter or program commandline argument
 func compile_file(path: String = Process.arguments[1]) {
     let content = readfile(path)
     let file_name = path.lastPathComponent.componentsSeparatedByString(".")[0]

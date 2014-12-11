@@ -20,7 +20,11 @@ class If: Stmt {
 }
 class While: Stmt {
     let b: BExp, bl: Block
-    init(b: BExp, bl: Block) {self.b = b; self.bl = bl }
+    init(b: BExp, bl: Block) { self.b = b; self.bl = bl }
+}
+class For: Stmt {
+    let a: Assign, i: AExp, bl: Block
+    init(a: Assign, i: AExp, bl: Block) { self.a = a; self.i = i; self.bl = bl }
 }
 class Assign: Stmt {
     let s: String, a: AExp
@@ -101,12 +105,15 @@ func stmt() -> ([Token]) -> [(Stmt, [Token])] {
     let assign: ret = IdParser() ~ /T_OP(s: ":=") ~ laexp ==> { let ((x, _), z) = $0; return Assign(s: x, a: z) }
     let pIf: ret = /T_KWD(s: "if") ~ lbexp ~ /T_KWD(s: "then") ~ lblock ~ /T_KWD(s: "else") ~ lblock ==>
         { let (((((_,y),_),u),_),w) = $0; return If(a: y, bl1: u, bl2: w) }
-    let pWhile: ret = /T_KWD(s: "while") ~ lbexp ~ /T_KWD(s: "do") ~ lblock ==> { let (((_, y), _), w) = $0; return While(b: y, bl: w) }
+    let pWhile: ret = /T_KWD(s: "while") ~ lbexp ~ /T_KWD(s: "do") ~ lblock ==>
+        { let (((_, y), _), w) = $0; return While(b: y, bl: w) }
+    let pFor: ret = /T_KWD(s: "for") ~ assign ~ /T_KWD(s: "upto") ~ laexp ~ /T_KWD(s: "do") ~ lblock ==>
+        { let (((((_, y), _), u), _), w) = $0; return For(a: y as Assign, i: u, bl: w) }
     let read: ret = /T_KWD(s: "read") ~ IdParser() ==> { let (_, y) = $0; return Read(y) }
     let writeS: ret = /T_KWD(s: "write") ~ StringParser() ==> { let (_, y) = $0; return WriteS(y) }
     let write: ret = /T_KWD(s: "write") ~ laexp ==> { let (_, y) = $0; return Write(y) }
     
-    return skip || assign || pIf || pWhile || writeS || write || read
+    return skip || assign || pIf || pWhile || pFor || writeS || write || read
 }
 let lstmt = lazy(stmt)
 
